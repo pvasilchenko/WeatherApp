@@ -32,6 +32,9 @@ final class CoreDataRequests {
         if let daily = city.daily {
             city.removeFromDaily(daily)
         }
+//       Дабы приложение соответствовало техническим требованиям, пришлось расширить базу данных
+//        о погоде, вручную, тк АПИ позволяет получить данные всего-лишь на неделю вперед. Заметил слишком поздно, когда все уже было готово
+        
         var responce = responce
         responce.daily.data += responce.daily.data + responce.daily.data
         var currentWeather = weatherEntity(from: responce.currently)
