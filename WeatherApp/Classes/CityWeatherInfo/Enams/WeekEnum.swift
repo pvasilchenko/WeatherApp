@@ -1,46 +1,12 @@
 //
-//  DataStruct.swift
+//  WeekEnum.swift
 //  weatherApp
 //
-//  Created by Pavel Vasylchenko on 9/11/18.
+//  Created by Pavel Vasylchenko on 10/21/18.
 //  Copyright © 2018 Pavel Vasylchenko. All rights reserved.
 //
 
 import Foundation
-
-struct CityData {
-    var name: String
-    var latitude: String
-    var longitude: String
-}
-
-struct Weather: Codable {
-    var summary:String
-    var icon:String
-    var temperature:Double
-    var time: Int
-    var apparentTemperature: Double
-    var windSpeed: Double
-}
-
-struct WeatherAPIResponce: Codable {
-    var currently: Weather
-    var daily: DailyWeather
-}
-
-struct DailyWeather: Codable {
-    var data: [DailyWeatherData]
-}
-
-struct DailyWeatherData: Codable {
-    var summary:String
-    var temperatureLow: Double
-    var temperatureHigh: Double?
-    var icon:String
-    var time: Int
-    var apparentTemperatureHigh: Double
-    var windSpeed: Double
-}
 
 enum WeekEnum: String, Codable {
     
@@ -89,16 +55,9 @@ enum WeekEnum: String, Codable {
             return "7"
         }
     }
-}
-
-enum CellID {
-    static let searchCityTVCell = "searchCityCell"
-    static let cityCell = "cityCell"
-    static let weatherInfoCell = "WeatherInfoCell"
-}
-
-enum Keys {
-    static let name = "name"
-    static let latitude = "latitude"
-    static let longitude = "longitude"
+    static var allCases:[WeekEnum] {
+        
+        return [WeekEnum.monday, WeekEnum.thursday, WeekEnum.wednesdey, WeekEnum.tuesday, WeekEnum.friday, WeekEnum.saturday, WeekEnum.sunday]
+        
+    }
 }

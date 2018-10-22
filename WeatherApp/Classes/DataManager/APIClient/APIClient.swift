@@ -6,27 +6,26 @@
 //  Copyright © 2018 Pavel Vasylchenko. All rights reserved.
 //
 
-import Foundation
 import GooglePlaces
 import Alamofire
 
-class ServerRequests {
-    func placeAutocomplete(place: String, complition: @escaping ([GMSAutocompletePrediction]) -> Void) {
+class APIClient {
+    func placeAutocomplete(place: String, complition: @escaping ([GMSAutocompletePrediction], Error?) -> Void) {
         let filter = GMSAutocompleteFilter()
         let placesClient = GMSPlacesClient()
         filter.type = .city
         placesClient.autocompleteQuery(place, bounds: nil, filter: filter, callback: {(results, error) -> Void in
             if let error = error {
-                print("Autocomplete error \(error)")
+                complition([], error)
                 return
             }
             if let results = results {
-                complition(results)
+                complition(results, nil)
             }
         })
     }
     
-    func getPlaceData(_ placeID: String,  complition: @escaping (GMSPlace) -> Void) {
+    func getPlaceData(_ placeID: String,  complition: @escaping (GMSPlace?, Error?) -> Void) {
         let placesClient = GMSPlacesClient()
         placesClient.lookUpPlaceID(placeID, callback: { (place, error) -> Void in
             if let error = error {
@@ -35,14 +34,14 @@ class ServerRequests {
             }
             
             guard let place = place else {
-                print("No place details for \(placeID)")
+                complition(nil, error)
                 return
             }
-            complition(place)
+            complition(place, nil)
         })
     }
     
-    func getWeather(_ latitude: String, _ longitude: String, callback: @escaping (WeatherAPIResponce) -> Void) {
+    func getWeather(_ latitude: String, _ longitude: String, callback: @escaping (WeatherAPIResponce?, Error?) -> Void) {
         
         let url = "https://api.darksky.net/forecast/74da64e1ebfb7d1ea0d16ce563db2618/\(latitude),\(longitude)"
         Alamofire.request(url, method: .get, parameters: nil, encoding: JSONEncoding.default, headers: nil).validate().responseData { (response) in
@@ -52,12 +51,12 @@ class ServerRequests {
                 do {
                     let apiResponce = try decoder.decode(WeatherAPIResponce.self, from: data)
                     print(response)
-                    callback(apiResponce)
+                    callback(apiResponce, nil)
                 } catch {
-                    print(error)
+                    callback(nil, error)
                 }
             case .failure(let error):
-                print(error)
+                callback(nil, error)
             }
         }
     }

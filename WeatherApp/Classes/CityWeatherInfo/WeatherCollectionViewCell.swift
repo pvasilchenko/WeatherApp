@@ -17,13 +17,8 @@ class WeatherCollectionViewCell: UICollectionViewCell {
     
     func setupCell(from weather: DailyWeatherEntity, and day: Date, _ isCelsius: Bool) {
         let dayPosition = String(Calendar.current.component(.weekday, from: day))
-        let daysArray:[WeekEnum?] = [WeekEnum.monday, WeekEnum.thursday, WeekEnum.wednesdey, WeekEnum.tuesday, WeekEnum.friday, WeekEnum.saturday, WeekEnum.sunday]
-        for weekDay in daysArray {
-            if weekDay?.positionStringValue == dayPosition {
-                dayLabel.text = weekDay?.displayName
-            }
-        }
-        
+        dayLabel.text = WeekEnum.allCases.first { $0.positionStringValue ==  dayPosition }?.displayName
+
         if isCelsius {
             weatherLabel.text  = String(convertToCelsius(from: Int(weather.apparentTemperature))) + "°"
         } else {
@@ -39,9 +34,4 @@ class WeatherCollectionViewCell: UICollectionViewCell {
             self.backgroundColor = isSelected ? UIColor.red : UIColor.black
         }
     }
-}
-
-
-func convertToCelsius(from fahrenheit: Int) -> Int {
-    return Int(5.0 / 9.0 * (Double(fahrenheit) - 32.0))
 }

@@ -9,10 +9,9 @@
 import Foundation
 import UIKit
 
-class WeatherInfoRouter: NSObject {
-    weak var viewController: UIViewController?
+class WeatherInfoRouter {
+    weak private var viewController: UIViewController?
     init(vc: UIViewController) {
-        super.init()
         self.viewController = vc
     }
 }

@@ -13,59 +13,38 @@ import CoreData
 
 class CityListViewController: UIViewController {
     
+    private enum CellID {
+        static let cityCell = "cityCell"
+    }
     
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var celsDegreeButton: UIButton!
-    @IBOutlet weak var fahrDegreeButton: UIButton!
+    @IBOutlet private weak var tableView: UITableView!
+    @IBOutlet private weak var celsDegreeButton: UIButton!
+    @IBOutlet private weak var fahrDegreeButton: UIButton!
     
-//    var fetchedResultsController: NSFetchedResultsController<NSFetchRequestResult>!
-    var isCelsDegree = true
+    var presenter: CityListPresenterProtocol?
     
-    var citiesArray = [CityEntity]()
+    private var isCelsDegree = true
+    
+    private var citiesArray = [CityEntity]()
     
     var output: CityListViewOutput?
     
-    let coreDataRequest = CoreDataRequests()
-    let request = ServerRequests()
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.citiesArray = self.coreDataRequest.getCityData()
         self.setupDegreeTapped(celsDegreeButton)
-//        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "CityEntity")
-//        fetchRequest.sortDescriptors = [
-//            NSSortDescriptor(key: "name", ascending: true),
-//            NSSortDescriptor(key: "latitude", ascending: true),
-//            NSSortDescriptor(key: "longitude", ascending: true)
-//        ]
-//
-//        fetchedResultsController = NSFetchedResultsController (fetchRequest: fetchRequest, managedObjectContext: (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext , sectionNameKeyPath: nil, cacheName: nil)
-    }
-    
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        self.output = CityListRouter(vc: self)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
-        self.citiesArray = self.coreDataRequest.getCityData()
-        tableView.reloadData()
-        self.updateWeather()
+        presenter?.updateWeather()
     }
     
-    func updateWeather() {
-        if citiesArray.count > 0 {
-            for city in citiesArray {
-                request.getWeather(city.value(forKey: Keys.latitude) as! String, city.value(forKey: Keys.longitude) as! String, callback: { results -> Void in
-                    self.coreDataRequest.updateCityWeather(city, results)
-                    self.tableView.reloadData()
-                })
-            }
-        }
+    func display(cities: [CityEntity]) {
+        self.citiesArray = cities
+        self.tableView.reloadData()
     }
     
-    @IBAction func setupDegreeTapped(_ sender: UIButton) {
+    @IBAction private func setupDegreeTapped(_ sender: UIButton) {
         switch sender {
         case celsDegreeButton:
             isCelsDegree = true
@@ -83,23 +62,22 @@ class CityListViewController: UIViewController {
         tableView.reloadData()
     }
     
-    @IBAction func addCityButtonTapped(_ sender: Any) {
+    @IBAction private func addCityButtonTapped(_ sender: Any) {
         output?.addCity()
     }
 }
 
 extension CityListViewController {
     
-    func setupInactiveButton(_ button: UIButton) {
-            button.layer.borderWidth = 1
-            button.titleLabel?.textColor = UIColor(red: 224, green: 223, blue: 223, alpha: 1)
+    private func setupInactiveButton(_ button: UIButton) {
+        button.layer.borderWidth = 1
+        button.titleLabel?.textColor = UIColor(red: 224, green: 223, blue: 223, alpha: 1)
     }
     
-    func setupActiveButton(_ activeButton: UIButton) {
+    private func setupActiveButton(_ activeButton: UIButton) {
         activeButton.titleLabel?.textColor = UIColor.red
         activeButton.setTitleColor(UIColor.red, for: .normal)
         activeButton.layer.borderWidth = 0
-//        activeButton.setTitleColor(UIColor(red: 0, green: 0, blue: 0, alpha: 1), for: .normal)
     }
 }
 
@@ -128,7 +106,7 @@ extension CityListViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            self.coreDataRequest.deleteCity(cityForDelete: citiesArray[indexPath.row])
+            presenter?.deleteCity(city: citiesArray[indexPath.row])
             self.citiesArray.remove(at: indexPath.row)
             tableView.performBatchUpdates({
                 tableView.deleteRows(at: [indexPath], with: .fade)

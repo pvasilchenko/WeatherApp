@@ -8,19 +8,17 @@
 
 import Foundation
 import CoreData
-import UIKit
 import GooglePlaces
 
-final class CoreDataRequests {
+final class CoreDataService {
     
-    var context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     func saveCity(cityName: String, cityInfo: GMSPlace) {
-        var city = NSEntityDescription.insertNewObject(forEntityName: "CityEntity",
-                                                       into: context) as! CityEntity
-        city.setValue(cityName, forKey: Keys.name)
-        city.setValue(String(cityInfo.coordinate.latitude), forKey: Keys.latitude)
-        city.setValue(String(cityInfo.coordinate.longitude), forKey: Keys.longitude)
+        let city = CityEntity(context: context)
+        city.name = cityName
+        city.latitude = String(cityInfo.coordinate.latitude)
+        city.longitude = String(cityInfo.coordinate.longitude)
         do {
             try context.save()
         } catch {
@@ -37,7 +35,7 @@ final class CoreDataRequests {
         
         var responce = responce
         responce.daily.data += responce.daily.data + responce.daily.data
-        var currentWeather = weatherEntity(from: responce.currently)
+        let currentWeather = weatherEntity(from: responce.currently)
         var dailyWeather = [DailyWeatherEntity]()
         for weather in responce.daily.data {
             dailyWeather.append(dailyEntity(from: weather))
@@ -52,8 +50,8 @@ final class CoreDataRequests {
         }
     }
     
-    func weatherEntity(from weather: Weather) -> WeatherEntity {
-        var entity = NSEntityDescription.insertNewObject(forEntityName: "WeatherEntity",
+    private func weatherEntity(from weather: Weather) -> WeatherEntity {
+        let entity = NSEntityDescription.insertNewObject(forEntityName: "WeatherEntity",
                                                           into: context) as! WeatherEntity
         entity.icon = weather.icon
         entity.summary = weather.summary
@@ -64,8 +62,8 @@ final class CoreDataRequests {
         return entity
     }
     
-    func dailyEntity(from weather: DailyWeatherData) -> DailyWeatherEntity {
-        var entity = NSEntityDescription.insertNewObject(forEntityName: "DailyWeatherEntity",
+    private func dailyEntity(from weather: DailyWeatherData) -> DailyWeatherEntity {
+        let entity = NSEntityDescription.insertNewObject(forEntityName: "DailyWeatherEntity",
                                                          into: context) as! DailyWeatherEntity
         entity.icon = weather.icon
         entity.summery = weather.summary
@@ -96,8 +94,8 @@ final class CoreDataRequests {
     func deleteCity(cityForDelete: CityEntity) {
         let cities = getCityData()
         for city in cities {
-            if city.value(forKey: "name") as! String == cityForDelete.name {
-                try context.delete(city)
+            if city.name == cityForDelete.name {
+                context.delete(city)
             }
         }
         do {

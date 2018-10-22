@@ -7,73 +7,58 @@
 //
 
 import UIKit
-import CoreLocation
 import GooglePlaces
-
 
 class SearchCityViewController: UIViewController {
     
-    @IBOutlet weak var searchBar: UISearchBar!
-    @IBOutlet weak var cityTableView: UITableView!
+    private enum CellID {
+        static let searchCityTVCell = "searchCityCell"
+    }
     
-    let coreDataRequest = CoreDataRequests()
+    @IBOutlet private weak var searchBar: UISearchBar!
+    @IBOutlet private weak var cityTableView: UITableView!
     
-    var noResults = false
+    var presenter: SearchCityPresenterProtocol?
     
     var output: SearchCityViewOutput?
     
-    var placesArray = [GMSAutocompletePrediction]() {
-        didSet {
-            cityTableView.reloadData()
-        }
-    }
-    
-    let request = ServerRequests()
+    private var placesArray = [GMSAutocompletePrediction]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.setupComponents()
         self.searchBar.becomeFirstResponder()
     }
-    
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        output = SearchCityRouter(vc: self)
-    }
 
-    func setupComponents() {
+    private func setupComponents() {
         searchBar.keyboardAppearance = .dark
     }
     
-    @IBAction func cancelButtonTapped(_ sender: Any) {
+    @IBAction private func cancelButtonTapped(_ sender: Any) {
         output?.dismissViewController()
+    }
+    
+    func display(places: [GMSAutocompletePrediction]) {
+        self.placesArray = places
+        self.cityTableView.reloadData()
+    }
+    
+    func onSave() {
+        self.output?.dismissViewController()
     }
 }
 
 extension SearchCityViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
-        if let locationString = searchBar.text, !locationString.isEmpty {
-            request.placeAutocomplete(place: locationString, complition: { results -> Void in
-                if results.count > 0 {
-                    self.placesArray = results
-                } else {
-                    self.noResults = true
-                }
-            })
+        if let locationName = searchBar.text, !locationName.isEmpty {
+            presenter?.getCities(for: locationName)
         }
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        if let locationString = searchBar.text, !locationString.isEmpty {
-            request.placeAutocomplete(place: locationString, complition: { results -> Void in
-                if results.count > 0 {
-                    self.noResults = false
-                    self.placesArray = results
-                } else {
-                    self.noResults = true
-                }
-            })
+        if let locationName = searchBar.text, !locationName.isEmpty {
+            presenter?.getCities(for: locationName)
         } else {
             self.placesArray.removeAll()
         }
@@ -101,12 +86,6 @@ extension SearchCityViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let city =  self.placesArray[indexPath.row].attributedPrimaryText.string
-        if let placeID = self.placesArray[indexPath.row].placeID {
-            self.request.getPlaceData(placeID, complition: { place -> Void in
-                self.coreDataRequest.saveCity(cityName: city, cityInfo: place)
-                self.output?.dismissViewController()
-            })
-        }
+        presenter?.saveCityData(for: indexPath.row)
     }
 }

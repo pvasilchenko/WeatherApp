@@ -17,7 +17,7 @@ class CityTableViewCell: UITableViewCell {
     
     
     func reloadRow(_ city: CityEntity, _ isCelsius: Bool) {
-        cityNameLabel.text = city.value(forKey: Keys.name) as! String
+        cityNameLabel.text = city.name
         tempLabel.text = "\(String(Int(city.currently?.temperature ?? 0)))°"
         if isCelsius {
             if let temp = city.currently?.temperature {
@@ -25,9 +25,4 @@ class CityTableViewCell: UITableViewCell {
             }
         }
     }
-    
-    func convertToCelsius(from fahrenheit: Int) -> Int {
-        return Int(5.0 / 9.0 * (Double(fahrenheit) - 32.0))
-    }
-    
 }

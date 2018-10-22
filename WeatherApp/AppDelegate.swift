@@ -17,6 +17,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+        
+        window = UIWindow(frame: UIScreen.main.bounds)
+        let presenter = CityListViewPresenter()
+        let rootViewController = UINavigationController()
+        window?.rootViewController = rootViewController
+        window?.makeKeyAndVisible()
+        let view = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "CityListViewController") as! CityListViewController
+        presenter.viewController = view
+        view.presenter = presenter
+        rootViewController.pushViewController(view, animated: false)
+        rootViewController.setNavigationBarHidden(true, animated: false)
+        view.output = CityListRouter(vc: view)
+        
             GMSPlacesClient.provideAPIKey("AIzaSyCWWNQH9ySTtqZaXxkxL-PA6z5tbz3IDmQ")
         return true
     }

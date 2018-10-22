@@ -9,10 +9,9 @@
 import Foundation
 import UIKit
 
-class SearchCityRouter: NSObject {
-    weak var viewController: UIViewController?
+class SearchCityRouter {
+    weak private var viewController: UIViewController?
     init(vc: UIViewController) {
-        super.init()
         self.viewController = vc
     }
 }
